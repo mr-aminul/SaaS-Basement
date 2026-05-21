@@ -24,6 +24,8 @@ export interface BrandConfig {
 
 export interface AppLayoutConfig {
   navItems: NavItem[]
+  /** Extra routes for page heading icon/title (not shown in the main nav). */
+  pageHeadingItems?: NavItem[]
   brand: BrandConfig
   getPageTitle?: (pathname: string) => string
   fullScreenPaths?: string[]

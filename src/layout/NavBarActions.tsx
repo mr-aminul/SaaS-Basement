@@ -1,11 +1,11 @@
-import { useRef, useEffect, useState } from 'react'
-import { Bell, ChevronDown, Search, Menu, User, Settings, LogOut } from 'lucide-react'
-import type { LucideIcon } from 'lucide-react'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useRef, useEffect, useState, type ReactNode } from 'react'
+import { Bell, ChevronDown, Menu, User, Settings, LogOut } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 import { useNotifications } from '@/contexts/NotificationsContext'
 import { useSettings } from '@/contexts/SettingsContext'
 import { assets } from '@/config/assets'
 import { ConfirmModal } from '@/components/ConfirmModal'
+import { onDark, shellControlStyle } from './shell'
 
 function formatNotificationTime(ts: number) {
   const d = new Date(ts)
@@ -46,17 +46,14 @@ function NotificationBellDropdown() {
     closeTimeoutRef.current = setTimeout(() => setOpen(false), HOVER_CLOSE_DELAY_MS)
   }
 
-  useEffect(() => {
-    return () => clearCloseTimeout()
-  }, [])
+  useEffect(() => () => clearCloseTimeout(), [])
 
   const bellButtonStyle: React.CSSProperties = {
     position: 'relative',
     width: '2rem',
     height: '2rem',
     borderRadius: '0.4375rem',
-    border: '0.0625rem solid #E8ECF0',
-    background: '#fff',
+    ...shellControlStyle,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -107,9 +104,9 @@ function NotificationBellDropdown() {
       >
         <Bell
           size={14}
-          color={iconHovered || open ? assets.primary : '#6B7280'}
+          color={iconHovered || open ? onDark.text : onDark.textMuted}
           strokeWidth={iconHovered || open ? 2.5 : 1.75}
-          fill={iconHovered || open ? assets.primary : 'none'}
+          fill={iconHovered || open ? onDark.text : 'none'}
         />
         {unreadCount > 0 && <span style={badgeStyle} aria-hidden />}
       </button>
@@ -124,9 +121,7 @@ function NotificationBellDropdown() {
               justifyContent: 'space-between',
             }}
           >
-            <span style={{ fontSize: '0.8125rem', fontWeight: 600, color: '#111827' }}>
-              Notifications
-            </span>
+            <span style={{ fontSize: '0.8125rem', fontWeight: 600, color: '#111827' }}>Notifications</span>
             {unreadCount > 0 && (
               <button
                 type="button"
@@ -147,14 +142,7 @@ function NotificationBellDropdown() {
           </div>
           <div style={{ padding: '0.25rem 0' }}>
             {notifications.length === 0 ? (
-              <div
-                style={{
-                  padding: '1.5rem 0.75rem',
-                  fontSize: '0.8125rem',
-                  color: '#6B7280',
-                  textAlign: 'center',
-                }}
-              >
+              <div style={{ padding: '1.5rem 0.75rem', fontSize: '0.8125rem', color: '#6B7280', textAlign: 'center' }}>
                 No notifications yet
                 <button
                   type="button"
@@ -194,9 +182,7 @@ function NotificationBellDropdown() {
                 >
                   <span style={{ fontWeight: 600, color: '#111827' }}>{n.title}</span>
                   {n.message && (
-                    <div style={{ marginTop: '0.25rem', color: '#6B7280', fontWeight: 400 }}>
-                      {n.message}
-                    </div>
+                    <div style={{ marginTop: '0.25rem', color: '#6B7280', fontWeight: 400 }}>{n.message}</div>
                   )}
                   <div style={{ marginTop: '0.25rem', fontSize: '0.6875rem', color: '#9CA3AF' }}>
                     {formatNotificationTime(n.createdAt)}
@@ -209,35 +195,13 @@ function NotificationBellDropdown() {
       )}
       {open && !settings.notifications && (
         <div style={panelStyle} role="dialog" aria-label="Notifications">
-          <div
-            style={{
-              padding: '1rem 0.75rem',
-              fontSize: '0.8125rem',
-              color: '#6B7280',
-              textAlign: 'center',
-            }}
-          >
+          <div style={{ padding: '1rem 0.75rem', fontSize: '0.8125rem', color: '#6B7280', textAlign: 'center' }}>
             In-app notifications are off. Turn them on in Settings.
           </div>
         </div>
       )}
     </div>
   )
-}
-
-export interface TopBarProps {
-  title: string | ((pathname: string) => string)
-  titleIcon?: LucideIcon
-  userName?: string
-  profileSubtext?: string
-  onSignOut?: () => void
-  centerSlot?: React.ReactNode
-  searchPlaceholder?: string
-  rightSlot?: React.ReactNode
-  languageLabel?: string
-  onLanguageClick?: () => void
-  onMobileMenuOpen: () => void
-  isMobile?: boolean
 }
 
 function ProfileDropdown({
@@ -276,9 +240,7 @@ function ProfileDropdown({
     closeTimeoutRef.current = setTimeout(() => setOpen(false), HOVER_CLOSE_DELAY_MS)
   }
 
-  useEffect(() => {
-    return () => clearCloseTimeout()
-  }, [])
+  useEffect(() => () => clearCloseTimeout(), [])
 
   useEffect(() => {
     if (!open || isMobile) return
@@ -294,16 +256,6 @@ function ProfileDropdown({
   const handleNav = (path: string) => {
     setOpen(false)
     navigate(path)
-  }
-
-  const handleSignOutClick = () => {
-    setOpen(false)
-    setShowSignOutConfirm(true)
-  }
-
-  const handleSignOutConfirm = () => {
-    setShowSignOutConfirm(false)
-    onSignOut?.()
   }
 
   const triggerStyle: React.CSSProperties = isMobile
@@ -330,8 +282,7 @@ function ProfileDropdown({
         cursor: 'pointer',
         padding: '0.1875rem 0.5rem 0.1875rem 0.1875rem',
         borderRadius: '0.5rem',
-        border: '0.0625rem solid #E8ECF0',
-        background: '#fff',
+        ...shellControlStyle,
         height: '2rem',
       }
 
@@ -378,7 +329,7 @@ function ProfileDropdown({
         aria-expanded={open}
       >
         {isMobile ? (
-          (userName ? userName.slice(0, 2).toUpperCase() : '?')
+          userName ? userName.slice(0, 2).toUpperCase() : '?'
         ) : (
           <>
             <div
@@ -400,20 +351,13 @@ function ProfileDropdown({
               {userName ? userName.slice(0, 2).toUpperCase() : '?'}
             </div>
             {userName != null && (
-              <span
-                style={{
-                  fontSize: '0.75rem',
-                  fontWeight: 500,
-                  color: '#1F2937',
-                  whiteSpace: 'nowrap',
-                }}
-              >
+              <span style={{ fontSize: '0.75rem', fontWeight: 500, color: onDark.text, whiteSpace: 'nowrap' }}>
                 {userName}
               </span>
             )}
             <ChevronDown
               size={12}
-              color="#9CA3AF"
+              color={onDark.textMuted}
               strokeWidth={2}
               style={{ flexShrink: 0, transform: open ? 'rotate(180deg)' : 'none' }}
             />
@@ -422,19 +366,10 @@ function ProfileDropdown({
       </button>
       {open && (
         <div style={panelStyle} role="menu" aria-label="Profile menu">
-          <div
-            style={{
-              padding: '0.625rem 0.75rem',
-              borderBottom: '0.0625rem solid #E8ECF0',
-            }}
-          >
-            <div style={{ fontSize: '0.8125rem', fontWeight: 600, color: '#111827' }}>
-              {userName ?? 'User'}
-            </div>
+          <div style={{ padding: '0.625rem 0.75rem', borderBottom: '0.0625rem solid #E8ECF0' }}>
+            <div style={{ fontSize: '0.8125rem', fontWeight: 600, color: '#111827' }}>{userName ?? 'User'}</div>
             {profileSubtext && (
-              <div style={{ fontSize: '0.75rem', color: '#6B7280', marginTop: '0.125rem' }}>
-                {profileSubtext}
-              </div>
+              <div style={{ fontSize: '0.75rem', color: '#6B7280', marginTop: '0.125rem' }}>{profileSubtext}</div>
             )}
           </div>
           <button
@@ -462,7 +397,10 @@ function ProfileDropdown({
             type="button"
             className="topbar-dropdown-item topbar-dropdown-item--signout"
             style={{ ...itemStyle, color: '#DC2626' }}
-            onClick={handleSignOutClick}
+            onClick={() => {
+              setOpen(false)
+              setShowSignOutConfirm(true)
+            }}
             role="menuitem"
           >
             <LogOut size={14} color="#DC2626" strokeWidth={2} />
@@ -473,7 +411,10 @@ function ProfileDropdown({
       <ConfirmModal
         open={showSignOutConfirm}
         onClose={() => setShowSignOutConfirm(false)}
-        onConfirm={handleSignOutConfirm}
+        onConfirm={() => {
+          setShowSignOutConfirm(false)
+          onSignOut?.()
+        }}
         title="Sign out?"
         message="Are you sure you want to sign out?"
         confirmLabel="Sign out"
@@ -484,200 +425,83 @@ function ProfileDropdown({
   )
 }
 
-export function TopBar({
-  title,
-  titleIcon: TitleIcon,
+export interface NavBarActionsProps {
+  userName?: string
+  profileSubtext?: string
+  onSignOut?: () => void
+  rightSlot?: ReactNode
+  /** Rendered immediately before the notification bell (desktop). */
+  leadingSlot?: ReactNode
+  languageLabel?: string
+  onLanguageClick?: () => void
+  onMobileMenuOpen?: () => void
+  isMobile?: boolean
+}
+
+export function NavBarActions({
   userName,
   profileSubtext,
   onSignOut,
-  centerSlot,
-  searchPlaceholder,
   rightSlot,
+  leadingSlot,
   languageLabel,
   onLanguageClick,
   onMobileMenuOpen,
   isMobile = false,
-}: TopBarProps) {
-  const location = useLocation()
-  const pathname = location.pathname
-  const titleText = typeof title === 'function' ? title(pathname) : title
-
-  if (isMobile) {
-    return (
-      <header
-        style={{
-          background: '#FFFFFF',
-          borderBottom: '0.0625rem solid #E8ECF0',
-          height: '3.25rem',
-          display: 'flex',
-          alignItems: 'center',
-          padding: '0 1rem',
-          gap: '0.625rem',
-          flexShrink: 0,
-        }}
-      >
+}: NavBarActionsProps) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexShrink: 0, marginLeft: 'auto' }}>
+      {isMobile && onMobileMenuOpen && (
         <button
+          type="button"
           onClick={onMobileMenuOpen}
           style={{
             width: '2.125rem',
             height: '2.125rem',
             borderRadius: '0.5rem',
-            border: '0.0625rem solid #E8ECF0',
-            background: '#fff',
+            ...shellControlStyle,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             cursor: 'pointer',
             flexShrink: 0,
           }}
+          aria-label="Open menu"
         >
-          <Menu size={16} color="#374151" strokeWidth={2} />
+          <Menu size={16} color={onDark.text} strokeWidth={2} />
         </button>
-        <span
+      )}
+      {languageLabel != null && onLanguageClick && (
+        <button
+          type="button"
+          onClick={onLanguageClick}
           style={{
-            flex: 1,
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            fontSize: '1rem',
-            fontWeight: 700,
-            color: '#111827',
-            overflow: 'hidden',
-            minWidth: 0,
+            height: '2rem',
+            padding: isMobile ? '0 0.5rem' : '0 0.625rem',
+            borderRadius: '0.4375rem',
+            ...shellControlStyle,
+            fontSize: '0.6875rem',
+            fontWeight: 600,
+            color: onDark.text,
+            cursor: 'pointer',
+            flexShrink: 0,
           }}
         >
-          {TitleIcon && <TitleIcon size={18} strokeWidth={1.75} style={{ flexShrink: 0, color: '#374151' }} />}
-          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{titleText}</span>
-        </span>
-        {languageLabel != null && onLanguageClick && (
-          <button
-            onClick={onLanguageClick}
-            style={{
-              height: '2rem',
-              padding: '0 0.5rem',
-              borderRadius: '0.4375rem',
-              border: '0.0625rem solid #E8ECF0',
-              background: '#fff',
-              fontSize: '0.6875rem',
-              fontWeight: 600,
-              color: '#374151',
-              cursor: 'pointer',
-              flexShrink: 0,
-            }}
-          >
-            🌐 {languageLabel}
-          </button>
-        )}
-        {rightSlot ?? (
-          <>
-            <NotificationBellDropdown />
-            <ProfileDropdown
-              userName={userName}
-              profileSubtext={profileSubtext}
-              onSignOut={onSignOut}
-              isMobile={true}
-            />
-          </>
-        )}
-      </header>
-    )
-  }
-
-  const centerContent =
-    centerSlot ??
-    (searchPlaceholder != null && (
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.5rem',
-          background: assets.surface,
-          border: '0.0625rem solid #E8ECF0',
-          borderRadius: '0.5rem',
-          padding: '0 0.75rem',
-          height: '2.125rem',
-          width: '11.25rem',
-          flexShrink: 0,
-        }}
-      >
-        <Search size={13} color="#9CA3AF" style={{ flexShrink: 0 }} />
-        <input
-          placeholder={searchPlaceholder}
-          style={{
-            border: 'none',
-            background: 'transparent',
-            outline: 'none',
-            fontSize: '0.75rem',
-            color: '#6B7280',
-            width: '100%',
-          }}
-        />
-      </div>
-    ))
-
-  return (
-    <header
-      style={{
-        background: '#FFFFFF',
-        borderBottom: '0.0625rem solid #E8ECF0',
-        height: '3.5rem',
-        display: 'flex',
-        alignItems: 'center',
-        padding: '0 1.25rem',
-        gap: '0.75rem',
-        flexShrink: 0,
-      }}
-    >
-      <div style={{ flex: 1, minWidth: 0, overflow: 'hidden', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-        {TitleIcon && <TitleIcon size={18} strokeWidth={1.75} style={{ flexShrink: 0, color: '#374151' }} />}
-        <span
-          style={{
-            color: '#111827',
-            fontSize: '1rem',
-            fontWeight: 700,
-            whiteSpace: 'nowrap',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-          }}
-        >
-          {titleText}
-        </span>
-      </div>
-      {centerContent}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-        {languageLabel != null && onLanguageClick && (
-          <button
-            onClick={onLanguageClick}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.25rem',
-              height: '2rem',
-              padding: '0 0.625rem',
-              borderRadius: '0.4375rem',
-              border: '0.0625rem solid #E8ECF0',
-              background: '#fff',
-              fontSize: '0.6875rem',
-              fontWeight: 600,
-              color: '#374151',
-              cursor: 'pointer',
-            }}
-          >
-            🌐 {languageLabel}
-          </button>
-        )}
-        {rightSlot ?? (
-          <>
-            <NotificationBellDropdown />
-            <ProfileDropdown
-              userName={userName}
-              profileSubtext={profileSubtext}
-              onSignOut={onSignOut}
-              isMobile={false}
-            />
-          </>
-        )}
-      </div>
-    </header>
+          🌐 {languageLabel}
+        </button>
+      )}
+      {leadingSlot}
+      {rightSlot ?? (
+        <>
+          <NotificationBellDropdown />
+          <ProfileDropdown
+            userName={userName}
+            profileSubtext={profileSubtext}
+            onSignOut={onSignOut}
+            isMobile={isMobile}
+          />
+        </>
+      )}
+    </div>
   )
 }

@@ -5,9 +5,9 @@
 export interface ThemePalette {
   /** App shell / layout outer background */
   background: string
-  /** Mobile sidebar panel (slightly lighter than background) */
+  /** Top navigation bar (slightly lighter than background) */
   sidebar: string
-  /** Sidebar logo badge */
+  /** Nav bar logo badge */
   logo: string
   /** Accents on light surfaces: avatar, notification hover, links */
   primary: string

@@ -1,23 +1,24 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
-import { Sidebar } from './Sidebar'
-import { TopBar } from './TopBar'
+import { AppNavBar } from './AppNavBar'
+import { PageHeading } from './PageHeading'
 import { useBreakpoint } from './useBreakpoint'
 import type { AppLayoutConfig, NavItem } from './types'
 import { assets, getBackgroundStyle } from '@/config/assets'
+import { shellPaddingBottom, shellPaddingX } from './shell'
 
 interface AppLayoutProps extends AppLayoutConfig {
   banner?: React.ReactNode
   bottomNavItem?: NavItem
-  sidebarBottomContent?: React.ReactNode
+  navBottomContent?: React.ReactNode
   profileLabel?: string
   profileSubtext?: string
   onProfileClick?: () => void
   onSignOut?: () => void
   getPageTitle?: (pathname: string) => string
   searchPlaceholder?: string
-  topBarCenterSlot?: React.ReactNode
-  topBarRightSlot?: React.ReactNode
+  pageHeadingCenterSlot?: React.ReactNode
+  navRightSlot?: React.ReactNode
   userName?: string
   languageLabel?: string
   onLanguageClick?: () => void
@@ -25,41 +26,36 @@ interface AppLayoutProps extends AppLayoutConfig {
 
 export function AppLayout({
   navItems,
+  pageHeadingItems = [],
   brand,
   getPageTitle = () => '',
   fullScreenPaths = [],
   fontFamily = "'Roboto', sans-serif",
   banner,
   bottomNavItem,
-  sidebarBottomContent,
-  profileLabel,
+  navBottomContent,
+  profileLabel: _profileLabel,
   profileSubtext,
-  onProfileClick,
+  onProfileClick: _onProfileClick,
   onSignOut,
   searchPlaceholder,
-  topBarCenterSlot,
-  topBarRightSlot,
+  pageHeadingCenterSlot,
+  navRightSlot,
   userName,
   languageLabel,
   onLanguageClick,
 }: AppLayoutProps) {
   const location = useLocation()
-  const { isMobile, isTablet } = useBreakpoint()
-
-  const [isCollapsed, setIsCollapsed] = useState(true)
-  const [isMobileOpen, setIsMobileOpen] = useState(false)
-  const prevTablet = useRef(isTablet)
+  const { isMobile } = useBreakpoint()
+  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false)
 
   useEffect(() => {
-    if (isTablet && !prevTablet.current) {
-      setIsCollapsed(true)
-    }
-    prevTablet.current = isTablet
-  }, [isTablet])
-
-  useEffect(() => {
-    if (!isMobile) setIsMobileOpen(false)
+    if (!isMobile) setIsMobileNavOpen(false)
   }, [isMobile])
+
+  useEffect(() => {
+    setIsMobileNavOpen(false)
+  }, [location.pathname])
 
   const isFullScreen = fullScreenPaths.some(
     (p) => location.pathname === p || location.pathname.startsWith(p + '/')
@@ -67,13 +63,17 @@ export function AppLayout({
 
   const pathname = location.pathname
   const title = getPageTitle(pathname) || pathname || 'App'
-  const currentNavItem = navItems
+  const headingNavItems = [...navItems, ...pageHeadingItems]
+  const currentNavItem = headingNavItems
     .filter((item) => {
       const end = item.end ?? item.path === '/'
       return end ? pathname === item.path : pathname === item.path || pathname.startsWith(item.path + '/')
     })
     .sort((a, b) => b.path.length - a.path.length)[0]
   const titleIcon = currentNavItem?.icon
+
+  const padX = isMobile ? shellPaddingX.mobile : shellPaddingX.desktop
+  const padBottom = isMobile ? shellPaddingBottom.mobile : shellPaddingBottom.desktop
 
   if (isFullScreen) {
     return (
@@ -115,75 +115,62 @@ export function AppLayout({
       {banner}
       <div
         style={{
-          display: 'flex',
-          flex: 1,
-          minHeight: 0,
-          paddingRight: isMobile ? 0 : '0.5rem',
-          paddingBottom: isMobile ? 0 : '0.5rem',
+          flexShrink: 0,
+          paddingLeft: padX,
+          paddingRight: padX,
         }}
       >
-        <Sidebar
+        <AppNavBar
           navItems={navItems}
           brand={brand}
           bottomNavItem={bottomNavItem}
-          bottomContent={sidebarBottomContent}
-          profileLabel={profileLabel}
-          profileSubtext={profileSubtext}
-          onProfileClick={onProfileClick}
-          onSignOut={onSignOut}
-          isCollapsed={isMobile ? false : isCollapsed}
-          onToggle={() => setIsCollapsed((c) => !c)}
+          bottomContent={navBottomContent}
           isMobile={isMobile}
-          isMobileOpen={isMobileOpen}
-          onMobileClose={() => setIsMobileOpen(false)}
+          isMobileOpen={isMobileNavOpen}
+          onMobileClose={() => setIsMobileNavOpen(false)}
+          onMobileMenuOpen={() => setIsMobileNavOpen(true)}
+          userName={userName}
+          profileSubtext={profileSubtext}
+          onSignOut={onSignOut}
+          rightSlot={navRightSlot}
+          languageLabel={languageLabel}
+          onLanguageClick={onLanguageClick}
         />
-        <div
+      </div>
+      <div
+        style={{
+          flex: 1,
+          minHeight: 0,
+          display: 'flex',
+          flexDirection: 'column',
+          paddingLeft: padX,
+          paddingRight: padX,
+          paddingBottom: padBottom,
+          gap: isMobile ? '0.5rem' : '0.75rem',
+        }}
+      >
+        <main
           style={{
             flex: 1,
-            minWidth: 0,
-            paddingTop: isMobile ? 0 : '0.5rem',
-            paddingLeft: 0,
+            minHeight: 0,
+            overflowY: 'auto',
+            padding: isMobile ? '1rem' : '1.5rem',
+            background: assets.surface,
+            borderRadius: isMobile ? 0 : '0.75rem',
             display: 'flex',
             flexDirection: 'column',
           }}
         >
-          <div
-            style={{
-              flex: 1,
-              minHeight: 0,
-              background: assets.surface,
-              borderRadius: isMobile ? 0 : '0.75rem',
-              overflow: 'hidden',
-              display: 'flex',
-              flexDirection: 'column',
-            }}
-          >
-            <TopBar
-              title={title}
-              titleIcon={titleIcon}
-              userName={userName}
-              profileSubtext={profileSubtext}
-              onSignOut={onSignOut}
-              centerSlot={topBarCenterSlot}
-              searchPlaceholder={searchPlaceholder}
-              rightSlot={topBarRightSlot}
-              languageLabel={languageLabel}
-              onLanguageClick={onLanguageClick}
-              onMobileMenuOpen={() => setIsMobileOpen(true)}
-              isMobile={isMobile}
-            />
-            <main
-              style={{
-                flex: 1,
-                minHeight: 0,
-                overflowY: 'auto',
-                padding: isMobile ? '1rem' : '1.5rem',
-              }}
-            >
-              <Outlet />
-            </main>
+          <PageHeading
+            title={title}
+            titleIcon={titleIcon}
+            centerSlot={pageHeadingCenterSlot}
+            searchPlaceholder={searchPlaceholder}
+          />
+          <div style={{ flex: 1, minHeight: 0 }}>
+            <Outlet />
           </div>
-        </div>
+        </main>
       </div>
     </div>
   )

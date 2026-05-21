@@ -2,14 +2,14 @@ import type { CSSProperties } from 'react'
 import { createPalette, type ThemePalette } from '@/config/theme'
 
 /**
- * Rebrand: set `brandColor` only. Layout background, sidebar, logo badge, accents,
+ * Rebrand: set `brandColor` only. Layout background, nav bar, logo badge, accents,
  * and content surfaces are derived as shades of this color.
  *
  * Optional overrides:
- * - logoUrl: image instead of icon in the sidebar
+ * - logoUrl: image for the nav logo and browser tab favicon (when set)
  * - loginBackgroundValue: login left panel (defaults to brandColor; can be image/gradient)
  */
-export const brandColor = '#040D31'
+export const brandColor = '#043123'
 
 const palette: ThemePalette = createPalette(brandColor)
 

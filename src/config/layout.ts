@@ -1,4 +1,5 @@
-import { LayoutDashboard, Settings, User, FileText, BarChart3, ShieldCheck } from 'lucide-react'
+import { LayoutDashboard, FileText, BarChart3, ShieldCheck, User, Settings } from 'lucide-react'
+import type { NavItem } from '@/layout'
 import type { AppLayoutConfig } from '@/layout'
 import { assets } from '@/config/assets'
 
@@ -8,7 +9,7 @@ import { assets } from '@/config/assets'
  */
 export const layoutConfig: Omit<AppLayoutConfig, 'getPageTitle'> = {
   brand: {
-    name: 'Auth Basement',
+    name: 'Saas Basement',
     subtitle: 'For Any Webapp',
     icon: ShieldCheck,
     logoUrl: assets.logoUrl || undefined,
@@ -16,20 +17,13 @@ export const layoutConfig: Omit<AppLayoutConfig, 'getPageTitle'> = {
   navItems: [
     { path: '/', label: 'Dashboard', icon: LayoutDashboard, end: true },
     { path: '/reports', label: 'Reports', icon: BarChart3, end: true },
-    {
-      path: '/documents',
-      label: 'Documents',
-      icon: FileText,
-      end: false,
-      children: [
-        { path: '/documents/page-1', label: 'Page 1' },
-        { path: '/documents/page-2', label: 'Page 2' },
-        { path: '/documents/page-3', label: 'Page 3' },
-      ],
-    },
+    { path: '/documents', label: 'Documents', icon: FileText, end: true },
+  ],
+  /** Routes reachable outside the main nav (e.g. profile menu) — used for page heading icon/title only. */
+  pageHeadingItems: [
     { path: '/profile', label: 'Profile', icon: User, end: true },
     { path: '/settings', label: 'Settings', icon: Settings, end: true },
-  ],
+  ] satisfies NavItem[],
 }
 
 export function getPageTitle(pathname: string): string {
@@ -37,9 +31,6 @@ export function getPageTitle(pathname: string): string {
     '/': 'Dashboard',
     '/reports': 'Reports',
     '/documents': 'Documents',
-    '/documents/page-1': 'Page 1',
-    '/documents/page-2': 'Page 2',
-    '/documents/page-3': 'Page 3',
     '/profile': 'Profile',
     '/settings': 'Settings',
   }
