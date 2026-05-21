@@ -1,6 +1,6 @@
 import { AppLayout } from './AppLayout'
 import { useAuth } from '@/contexts/AuthContext'
-import { layoutConfig, getPageTitle } from '@/config/layout'
+import { layoutConfig } from '@/config/layout'
 
 /**
  * App shell layout with top navigation and content header, wired to auth.
@@ -12,7 +12,6 @@ export default function AuthenticatedLayout() {
   return (
     <AppLayout
       {...layoutConfig}
-      getPageTitle={getPageTitle}
       userName={displayName}
       profileLabel={displayName}
       profileSubtext={user?.email}

@@ -6,6 +6,7 @@ import { useBreakpoint } from './useBreakpoint'
 import type { AppLayoutConfig, NavItem } from './types'
 import { assets, getBackgroundStyle } from '@/config/assets'
 import { shellPaddingBottom, shellPaddingX } from './shell'
+import { resolvePageHeading } from './resolvePageHeading'
 
 interface AppLayoutProps extends AppLayoutConfig {
   banner?: React.ReactNode
@@ -15,7 +16,6 @@ interface AppLayoutProps extends AppLayoutConfig {
   profileSubtext?: string
   onProfileClick?: () => void
   onSignOut?: () => void
-  getPageTitle?: (pathname: string) => string
   searchPlaceholder?: string
   pageHeadingCenterSlot?: React.ReactNode
   navRightSlot?: React.ReactNode
@@ -28,7 +28,6 @@ export function AppLayout({
   navItems,
   pageHeadingItems = [],
   brand,
-  getPageTitle = () => '',
   fullScreenPaths = [],
   fontFamily = "'Roboto', sans-serif",
   banner,
@@ -62,15 +61,7 @@ export function AppLayout({
   )
 
   const pathname = location.pathname
-  const title = getPageTitle(pathname) || pathname || 'App'
-  const headingNavItems = [...navItems, ...pageHeadingItems]
-  const currentNavItem = headingNavItems
-    .filter((item) => {
-      const end = item.end ?? item.path === '/'
-      return end ? pathname === item.path : pathname === item.path || pathname.startsWith(item.path + '/')
-    })
-    .sort((a, b) => b.path.length - a.path.length)[0]
-  const titleIcon = currentNavItem?.icon
+  const { title, icon: titleIcon } = resolvePageHeading(pathname, navItems, pageHeadingItems)
 
   const padX = isMobile ? shellPaddingX.mobile : shellPaddingX.desktop
   const padBottom = isMobile ? shellPaddingBottom.mobile : shellPaddingBottom.desktop
